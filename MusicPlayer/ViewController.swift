@@ -22,7 +22,7 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     // MARK: Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-//        self.addViewsWithCode()
+        self.addViewsWithCode()
         self.initializePlayer()
     }
     
@@ -83,11 +83,111 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
     }
         
     
+    // 뷰를 화면으로 그리기 (스토리보드에 이미지 다 삭제했음)
+    func addViewsWithCode() {
+        self.addPlayPauseButton()
+        self.addTimeLabel()
+        self.addProgressSlider()
+    }
+
+    
+    // 재생, 일시정지 버튼 그리기
+    func addPlayPauseButton() {
+        
+        let button: UIButton = UIButton(type: UIButton.ButtonType.custom)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(button)
+        
+        button.setImage(UIImage(named: "button_play"), for: UIControl.State.normal)
+        button.setImage(UIImage(named: "button_pause"), for: UIControl.State.selected)
+        
+        button.addTarget(self, action: #selector(self.touchUpPlayPauseButton(_:)), for: UIControl.Event.touchUpInside)
+        
+        let centerX: NSLayoutConstraint
+        centerX = button.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
+        
+        let centerY: NSLayoutConstraint
+        centerY = NSLayoutConstraint(item: button, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 0.8, constant: 0)
+        
+        let width: NSLayoutConstraint
+        width = button.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 0.3)
+        
+        let ratio: NSLayoutConstraint
+        ratio = button.heightAnchor.constraint(equalTo: button.widthAnchor, multiplier: 1)
+        
+        centerX.isActive = true
+        centerY.isActive = true
+        width.isActive = true
+        ratio.isActive = true
+        
+        self.playPauseButton = button
+    }
+    
+    func addTimeLabel() {
+        let timeLabel: UILabel = UILabel()
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(timeLabel)
+        
+        timeLabel.textColor = UIColor.black
+        timeLabel.textAlignment = NSTextAlignment.center
+        timeLabel.font = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.headline)
+        
+        let centerX: NSLayoutConstraint
+        centerX = timeLabel.centerXAnchor.constraint(equalTo: self.playPauseButton.centerXAnchor)
+        
+        let top: NSLayoutConstraint
+        top = timeLabel.topAnchor.constraint(equalTo: self.playPauseButton.bottomAnchor, constant: 8)
+        
+        centerX.isActive = true
+        top.isActive = true
+        
+        self.timeLabel = timeLabel
+        self.updateTimeLabelText(time: 0)
+    }
+    
+    func addProgressSlider() {
+        let slider: UISlider = UISlider()
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(slider)
+        
+        slider.minimumTrackTintColor = UIColor.red
+        
+        slider.addTarget(self, action: #selector(self.sliderValueChanged(_:)), for: UIControl.Event.valueChanged)
+        
+        let safeAreaGuide: UILayoutGuide = self.view.safeAreaLayoutGuide
+        
+        let centerX: NSLayoutConstraint
+        centerX = slider.centerXAnchor.constraint(equalTo: self.timeLabel.centerXAnchor)
+        
+        let top: NSLayoutConstraint
+        top = slider.topAnchor.constraint(equalTo: self.timeLabel.bottomAnchor, constant: 8)
+        
+        let leading: NSLayoutConstraint
+        leading = slider.leadingAnchor.constraint(equalTo: safeAreaGuide.leadingAnchor, constant: 16)
+        
+        let trailing: NSLayoutConstraint
+        trailing = slider.trailingAnchor.constraint(equalTo: safeAreaGuide.trailingAnchor, constant: -16)
+        
+        centerX.isActive = true
+        top.isActive = true
+        leading.isActive = true
+        trailing.isActive = true
+        
+        self.progressSlider = slider
+    }
+    
+
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
+    
+    // Play, Pause 를 눌렀을 때
     @IBAction func touchUpPlayPauseButton(_ sender: UIButton) {
         sender.isSelected = !sender.isSelected
                 
@@ -104,6 +204,8 @@ class ViewController: UIViewController, AVAudioPlayerDelegate {
                 }
     }
 
+    
+    // Slider를 움직였을 때
     @IBAction func sliderValueChanged(_ sender: UISlider) {
             self.updateTimeLabelText(time: TimeInterval(sender.value))
             if sender.isTracking { return }
